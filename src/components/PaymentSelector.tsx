@@ -13,24 +13,29 @@ interface PaymentSelectorProps {
 
 const PaymentSelector = ({ value, onChange }: PaymentSelectorProps) => {
   const paymentMethods = [
-    { id: "sber", name: "Сбербанк", icon: "🟢" },
-    { id: "tinkoff", name: "Тинькофф", icon: "🟡" },
+    { id: "sber", name: "Сбербанк", icon: "" },
+    { id: "tinkoff", name: "Тинькофф", icon: "" },
+    { id: "vtb", name: "ВТБ", icon: "" },
+    { id: "alfa", name: "Альфа-Банк", icon: "" },
+    { id: "raiffeisen", name: "Райффайзенбанк", icon: "" },
+    { id: "gazprom", name: "Газпромбанк", icon: "" },
+    { id: "rosbank", name: "Росбанк", icon: "" },
+    { id: "otkritie", name: "Открытие", icon: "" },
   ];
 
   return (
-    <div className="space-y-2">
-      <label className="text-sm font-medium text-gray-700">Способ оплаты</label>
+    <div className="space-y-3">
+      <label className="text-sm font-medium text-gray-900">
+        Банк для перевода
+      </label>
       <Select value={value} onValueChange={onChange}>
-        <SelectTrigger className="w-full">
-          <SelectValue placeholder="Выберите способ оплаты" />
+        <SelectTrigger className="w-full h-12 border-gray-200">
+          <SelectValue placeholder="Выберите банк" />
         </SelectTrigger>
         <SelectContent>
           {paymentMethods.map((method) => (
             <SelectItem key={method.id} value={method.id}>
-              <div className="flex items-center space-x-2">
-                <span>{method.icon}</span>
-                <span>{method.name}</span>
-              </div>
+              <span className="font-medium">{method.name}</span>
             </SelectItem>
           ))}
         </SelectContent>

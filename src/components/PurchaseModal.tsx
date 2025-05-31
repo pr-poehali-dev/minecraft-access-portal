@@ -8,6 +8,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import PaymentSelector from "./PaymentSelector";
+import PaymentStep from "./PaymentStep";
 
 interface PurchaseModalProps {
   isOpen: boolean;
@@ -17,75 +18,106 @@ interface PurchaseModalProps {
 const PurchaseModal = ({ isOpen, onClose }: PurchaseModalProps) => {
   const [nickname, setNickname] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("");
+  const [currentStep, setCurrentStep] = useState<"form" | "payment">("form");
   const [isLoading, setIsLoading] = useState(false);
 
-  const handlePurchase = async () => {
+  const getBankName = (id: string) => {
+    const banks: Record<string, string> = {
+      sber: "Сбербанк",
+      tinkoff: "Тинькофф",
+      vtb: "ВТБ",
+      alfa: "Альфа-Банк",
+      raiffeisen: "Райффайзенбанк",
+      gazprom: "Газпромбанк",
+      rosbank: "Росбанк",
+      otkritie: "Открытие",
+    };
+    return banks[id] || "";
+  };
+
+  const handleNext = () => {
     if (!nickname.trim() || !paymentMethod) {
       alert("Пожалуйста, заполните все поля");
       return;
     }
+    setCurrentStep("payment");
+  };
 
+  const handlePaymentComplete = () => {
     setIsLoading(true);
-
-    // Имитация перехода к оплате
     setTimeout(() => {
       alert(
-        `Переход к оплате через ${paymentMethod === "sber" ? "Сбербанк" : "Тинькофф"} для игрока ${nickname}`,
+        `Спасибо! Доступ для ${nickname} будет активирован в течение 5 минут.`,
       );
       setIsLoading(false);
       onClose();
       setNickname("");
       setPaymentMethod("");
+      setCurrentStep("form");
     }, 1000);
   };
 
+  const handleBack = () => {
+    setCurrentStep("form");
+  };
+
+  const handleClose = () => {
+    onClose();
+    setCurrentStep("form");
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-center text-xl font-bold">
-            Покупка проходки
+          <DialogTitle className="text-xl font-medium">
+            {currentStep === "form" ? "Покупка проходки" : "Оплата"}
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6 py-4">
-          <div className="text-center">
-            <div className="text-3xl mb-2">💎</div>
-            <p className="text-2xl font-bold text-emerald-600">100₽</p>
-            <p className="text-sm text-gray-500">Проходка на kleyki.com</p>
-          </div>
+        <div className="py-4">
+          {currentStep === "form" ? (
+            <div className="space-y-6">
+              <div className="text-center">
+                <p className="text-2xl font-medium text-gray-900 mb-1">100₽</p>
+                <p className="text-sm text-gray-600">Проходка на kleyki.com</p>
+              </div>
 
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <label className="text-sm font-medium text-gray-700">
-                Никнейм в Minecraft
-              </label>
-              <Input
-                type="text"
-                placeholder="Введите ваш никнейм"
-                value={nickname}
-                onChange={(e) => setNickname(e.target.value)}
-                className="w-full"
-              />
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-900">
+                    Никнейм в Minecraft
+                  </label>
+                  <Input
+                    type="text"
+                    placeholder="Введите ваш никнейм"
+                    value={nickname}
+                    onChange={(e) => setNickname(e.target.value)}
+                    className="w-full h-12 border-gray-200"
+                  />
+                </div>
+
+                <PaymentSelector
+                  value={paymentMethod}
+                  onChange={setPaymentMethod}
+                />
+              </div>
+
+              <Button
+                onClick={handleNext}
+                disabled={!nickname.trim() || !paymentMethod}
+                className="w-full bg-gray-900 hover:bg-gray-800 text-white font-medium py-3"
+              >
+                Продолжить
+              </Button>
             </div>
-
-            <PaymentSelector
-              value={paymentMethod}
-              onChange={setPaymentMethod}
+          ) : (
+            <PaymentStep
+              bankName={getBankName(paymentMethod)}
+              onBack={handleBack}
+              onComplete={handlePaymentComplete}
             />
-          </div>
-
-          <Button
-            onClick={handlePurchase}
-            disabled={isLoading || !nickname.trim() || !paymentMethod}
-            className="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3"
-          >
-            {isLoading ? "Обработка..." : "Перейти к оплате"}
-          </Button>
-
-          <p className="text-xs text-gray-500 text-center">
-            После оплаты проходка будет активирована автоматически
-          </p>
+          )}
         </div>
       </DialogContent>
     </Dialog>
